@@ -1,0 +1,26 @@
+# Render Blueprint configuration for Shared Self-Attendance Tracker
+services:
+  - type: web
+    name: shared-self-attendance-tracker
+    env: node
+    plan: free
+    region: oregon
+    buildCommand: "npm run install:all && npm run build"
+    startCommand: "npm run start"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DB_TYPE
+        value: sqlite
+      - key: SQLITE_DB_PATH
+        value: ./data/attendance.db
+      - key: DEFAULT_ATTENDANCE_TARGET
+        value: 75
+    disk:
+      name: attendance-data
+      mountPath: /opt/render/project/src/server/data
+      sizeGB: 1
