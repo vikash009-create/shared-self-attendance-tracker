@@ -8,6 +8,13 @@ import os
 import zipfile
 import sys
 
+# Ensure UTF-8 output even in standard Windows command prompt
+if sys.stdout.encoding != 'utf-8':
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+    except Exception:
+        pass
+
 def package_project():
     root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     zip_filename = os.path.join(root_dir, 'shared-self-attendance-tracker.zip')
@@ -36,8 +43,8 @@ def package_project():
         'Thumbs.db'
     }
 
-    print(f"📦 Packaging project from: {root_dir}")
-    print(f"🎯 Target archive: {zip_filename}\n")
+    print(f"[*] Packaging project from: {root_dir}")
+    print(f"[*] Target archive: {zip_filename}\n")
 
     file_count = 0
     total_uncompressed = 0
@@ -70,20 +77,20 @@ def package_project():
 
     archive_size = os.path.getsize(zip_filename)
     print("=" * 60)
-    print(f"✅ Archive successfully generated: {zip_filename}")
-    print(f"📁 Total files packaged: {file_count}")
-    print(f"💾 Uncompressed size: {total_uncompressed / 1024:.1f} KB")
-    print(f"🗜️  Compressed ZIP size: {archive_size / 1024:.1f} KB")
+    print(f"[SUCCESS] Archive successfully generated: {zip_filename}")
+    print(f"[INFO]    Total files packaged: {file_count}")
+    print(f"[INFO]    Uncompressed size: {total_uncompressed / 1024:.1f} KB")
+    print(f"[INFO]    Compressed ZIP size: {archive_size / 1024:.1f} KB")
     print("=" * 60)
 
-    # Verification: check readability of zip
+    # Verification: check readability and CRC of zip
     with zipfile.ZipFile(zip_filename, 'r') as verify_zip:
         bad_file = verify_zip.testzip()
         if bad_file:
-            print(f"❌ ZIP verification failed on file: {bad_file}")
+            print(f"[ERROR] ZIP verification failed on file: {bad_file}")
             sys.exit(1)
         else:
-            print("✨ ZIP archive integrity verification: PASSED (all CRC checks valid)")
+            print("[VERIFIED] ZIP archive integrity verification: PASSED (all CRC checks valid)")
 
 if __name__ == '__main__':
     package_project()
