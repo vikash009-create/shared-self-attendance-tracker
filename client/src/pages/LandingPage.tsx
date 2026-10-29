@@ -19,11 +19,16 @@ export const LandingPage: React.FC = () => {
 
   const handleDemoLogin = async () => {
     try {
-      await login('demo.student@university.edu', 'demo1234');
+      await login('alex.student@university.edu', 'Student@123');
       navigate('/dashboard');
     } catch {
-      // If demo account doesn't exist yet, redirect to login page
-      navigate('/login');
+      try {
+        await login('demo.student@university.edu', 'demo1234');
+        navigate('/dashboard');
+      } catch {
+        // If neither exists, redirect to login page
+        navigate('/login');
+      }
     }
   };
 

@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Full-Stack Shared Self-Attendance Tracker for Students",
   "private": true,
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "workspaces": [
     "server",
     "client"

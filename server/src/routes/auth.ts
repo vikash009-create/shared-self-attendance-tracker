@@ -8,15 +8,21 @@ import { AuthenticatedRequest, requireAuth, generateToken } from '../middleware/
 
 const router = Router();
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters long').max(100),
-  email: z.string().email('Please provide a valid email address').max(255),
+  email: z.string().min(3).max(255).refine(val => emailRegex.test(val.trim()), {
+    message: 'Please provide a valid email address (e.g. name@student.nitandhra.ac.in)'
+  }),
   password: z.string().min(6, 'Password must be at least 6 characters long'),
   defaultTargetPercentage: z.number().min(50).max(100).optional().default(75)
 });
 
 const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  email: z.string().min(3).max(255).refine(val => emailRegex.test(val.trim()), {
+    message: 'Please provide a valid email address'
+  }),
   password: z.string().min(1, 'Password is required')
 });
 

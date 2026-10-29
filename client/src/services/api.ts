@@ -20,13 +20,26 @@ function getAuthHeader(): Record<string, string> {
 
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
-    let errorMsg = 'An error occurred';
+    let errorMsg = '';
     try {
-      const data = await res.json();
-      errorMsg = data.error || data.message || errorMsg;
+      const text = await res.text();
+      try {
+        const data = JSON.parse(text);
+        errorMsg = data.error || data.message || (Array.isArray(data.errors) ? data.errors[0]?.message : null) || '';
+      } catch {
+        // Not JSON, check if text is a short readable message
+        if (text && text.length < 150 && !text.includes('<!DOCTYPE') && !text.includes('<html')) {
+          errorMsg = text.trim();
+        }
+      }
     } catch {
-      errorMsg = res.statusText || errorMsg;
+      // ignore
     }
+
+    if (!errorMsg) {
+      errorMsg = res.statusText || `Server returned error (${res.status})`;
+    }
+
     throw new Error(errorMsg);
   }
   return res.json();
