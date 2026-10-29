@@ -22,21 +22,27 @@ const PORT = process.env.PORT || 5000;
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 
 // Middleware
+const allowedOrigins: (string | RegExp)[] = ['http://localhost:5173', 'http://127.0.0.1:5173'];
+if (process.env.CLIENT_URL) {
+  allowedOrigins.push(process.env.CLIENT_URL);
+}
+
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' ? '*' : [CLIENT_URL, 'http://localhost:5173', 'http://127.0.0.1:5173'],
+  origin: process.env.NODE_ENV === 'production' && !process.env.CLIENT_URL ? '*' : allowedOrigins,
   credentials: true
 }));
 app.use(express.json());
 
-// API Routes
-app.use('/api/auth', authRouter);
-app.use('/api/subjects', subjectsRouter);
-app.use('/api/attendance', attendanceRouter);
-app.use('/api/groups', groupsRouter);
-app.use('/api/stats', statsRouter);
+// API Routes Router
+const apiRouter = express.Router();
+apiRouter.use('/auth', authRouter);
+apiRouter.use('/subjects', subjectsRouter);
+apiRouter.use('/attendance', attendanceRouter);
+apiRouter.use('/groups', groupsRouter);
+apiRouter.use('/stats', statsRouter);
 
 // Health check
-app.get('/api/health', (req: Request, res: Response) => {
+apiRouter.get('/health', (req: Request, res: Response) => {
   res.json({
     status: 'ok',
     service: 'Shared Self-Attendance Tracker API',
@@ -44,6 +50,10 @@ app.get('/api/health', (req: Request, res: Response) => {
     uptime: process.uptime()
   });
 });
+
+// Support both /api prefix (direct or reverse proxy) and stripped root paths
+app.use('/api', apiRouter);
+app.use('/', apiRouter);
 
 // Production: serve built static files from client/dist if present
 const clientDistPath = path.resolve(__dirname, '../../client/dist');
